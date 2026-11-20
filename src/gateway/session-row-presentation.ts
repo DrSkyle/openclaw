@@ -203,6 +203,7 @@ function prepareSessionRowRecipient(
   const sharing = prepareProjectedSessionSharing({
     cfg: policyConfig,
     client: client ?? null,
+    memberAccess: (value, id) => projection.memberAccess(value.storePath, value.storeKey, id),
     isMember: (value, identityId) =>
       projection
         .readMembership({
@@ -319,7 +320,7 @@ export function prepareProjectedSessionPresentation(
             { cfg: policyConfig, client: client ?? null, target: value },
             { policy: sharing.policy },
           )?.message ??
-          sharing.authorizeTarget(value, sharingRole)?.message ??
+          sharing.authorizeTarget(value, sharingRole, true)?.message ??
           (resolveSendPolicy({ cfg, entry: value.entry, sessionKey: value.canonicalKey }) === "deny"
             ? "send blocked by session policy"
             : null));
@@ -512,7 +513,7 @@ export function prepareProjectedSessionPresentation(
             client: client ?? null,
             sessionKey: value.canonicalKey,
             target: value,
-          }) && !sharing.authorizeTarget(value, recipientView?.sharingRole)
+          }) && !sharing.authorizeTarget(value, recipientView?.sharingRole, true)
         : undefined;
     const signature = views && optionKey(options);
     recipientFacts[0] = recipientView?.visibility;
