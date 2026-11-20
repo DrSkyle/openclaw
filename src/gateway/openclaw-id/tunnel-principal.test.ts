@@ -110,6 +110,30 @@ describe("OpenClaw ID tunnel principals", () => {
     expect(openclawIdTunnelRolePolicy(viewer)?.scopes).toEqual(["operator.sessions.read"]);
   });
 
+  it("retains the invitation ceiling in tunnel role policy", () => {
+    setRuntimeConfigSnapshot({
+      gateway: {
+        roles: {
+          definitions: {
+            collaborator: {
+              sessions: { others: "invited", maxInvitedAccess: "send" },
+              scopes: ["operator.sessions.read"],
+              agents: ["main"],
+            },
+          },
+        },
+      },
+    });
+    expect(
+      openclawIdTunnelRolePolicy({
+        kind: "member",
+        peerKey: "iroh:b",
+        accountId: "acct-op",
+        role: "collaborator",
+      })?.sessions,
+    ).toEqual({ others: "invited", maxInvitedAccess: "send" });
+  });
+
   it("denies unknown member roles at connect, HTTP and retained/recovery admission", async () => {
     const principal = {
       kind: "member" as const,

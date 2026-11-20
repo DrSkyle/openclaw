@@ -85,15 +85,27 @@ export async function readOwnerLinkStatus(params: {
       .toSorted()
       .map((name) => {
         const definition = defined(name) ? definitions[name] : undefined;
-        return definition
-          ? {
-              name,
-              defined: true as const,
-              sessions: definition.sessions.others,
-              requiresSandbox: definition.sandbox === "required",
-              admin: definition.scopes.includes("operator.admin"),
-            }
-          : { name, defined: false as const, requiresSandbox: false };
+        if (!definition) {
+          return { name, defined: false as const, requiresSandbox: false };
+        }
+        const role: {
+          name: string;
+          defined: true;
+          sessions: typeof definition.sessions.others;
+          requiresSandbox: boolean;
+          admin: boolean;
+          maxInvitedAccess?: typeof definition.sessions.maxInvitedAccess;
+        } = {
+          name,
+          defined: true,
+          sessions: definition.sessions.others,
+          requiresSandbox: definition.sandbox === "required",
+          admin: definition.scopes.includes("operator.admin"),
+        };
+        if (definition.sessions.maxInvitedAccess !== undefined) {
+          role.maxInvitedAccess = definition.sessions.maxInvitedAccess;
+        }
+        return role;
       }),
     sandboxBackend,
     linked: Boolean(state),
