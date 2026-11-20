@@ -21,6 +21,8 @@ import {
 
 /** The skill and draft pages share the detail model: breadcrumb, header, content and facts. */
 export function WorkshopDetailShell(props: {
+  /** A skill page has one header action; a draft page has Discard and Apply. */
+  kind: "skill" | "draft";
   view: WorkshopView;
   page: WorkshopPage;
   name: string;
@@ -32,7 +34,7 @@ export function WorkshopDetailShell(props: {
 }) {
   const id = `sw-detail-${createUniqueId()}`;
   return (
-    <div class="sw-detail">
+    <div class={["sw-detail", `sw-detail--${props.kind}`]}>
       <PluginDetailShell
         id={id}
         rail
@@ -129,6 +131,7 @@ export function Detail(props: {
   };
   return (
     <WorkshopDetailShell
+      kind="skill"
       view={props.view}
       page={props.page}
       name={target().name}

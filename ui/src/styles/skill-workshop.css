@@ -125,6 +125,12 @@
   line-height: 1.4;
 }
 
+.sw-learning-menu__docs {
+  display: none;
+  padding: 6px 12px 4px;
+  font-size: 12.5px;
+}
+
 .sw-learning-menu__learn svg {
   flex: none;
   width: 16px;
@@ -283,8 +289,24 @@
   display: flex;
   flex: none;
   align-items: center;
+  justify-content: flex-end;
   gap: 8px;
   padding-inline-end: 12px;
+}
+
+/* One right slot per row: every row's text ends at the same line, the slot at the column edge. */
+.sw-grid .sw-row__aside {
+  width: 164px;
+}
+
+.sw-row__aside--draft {
+  width: 160px;
+}
+
+/* Uses read in the right slot on wide screens and in the last line on a phone. */
+.sw-row__change-uses,
+.sw-row__change--uses-only {
+  display: none;
 }
 
 .sw-row__uses {
@@ -809,7 +831,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: 48px;
+  min-height: 64px;
   padding: 8px 10px 8px 14px;
 }
 
@@ -964,6 +986,10 @@
   .sw-hub-header .sw-learning__gear {
     margin-inline-start: auto;
   }
+
+  .sw-learning-menu__docs {
+    display: block;
+  }
 }
 
 @media (max-width: 900px) {
@@ -1005,12 +1031,26 @@
     -webkit-line-clamp: 2;
   }
 
-  .sw-grid .sw-row {
-    flex-wrap: wrap;
+  .sw-grid .sw-row__aside {
+    width: auto;
+    padding-inline-end: 8px;
   }
 
-  .sw-grid .sw-row__aside {
-    padding-inline-end: 8px;
+  .sw-grid .sw-row__aside:empty,
+  .sw-row__uses--aside {
+    display: none;
+  }
+
+  .sw-row__change-uses {
+    display: inline;
+  }
+
+  .sw-row__change--uses-only {
+    display: block;
+  }
+
+  .sw-row__change-uses + .sw-row__change-who::before {
+    content: " · ";
   }
 
   .sw-row__aside .btn,
@@ -1020,7 +1060,7 @@
   }
 
   /* Closed drafts open to act; their actions live under the diff. */
-  .sw-row__aside--closed {
+  .sw-row__aside--draft {
     display: none;
   }
 
@@ -1127,5 +1167,37 @@
   .sw-pager .btn--icon {
     width: 36px;
     height: 36px;
+  }
+}
+
+/* Phone: one secondary action stays at its natural width beside the name; two buttons take a row. */
+@container (max-width: 560px) {
+  .sw-detail--skill .plugin-catalog-detail--rail .plugin-catalog-detail__hero {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  .sw-detail--skill .plugin-catalog-detail--rail .plugin-catalog-detail__heading {
+    min-width: 0;
+  }
+
+  .sw-detail--skill .plugin-catalog-detail--rail .plugin-catalog-detail__title-row h1 {
+    overflow-wrap: anywhere;
+  }
+
+  .sw-detail--skill.sw-detail .plugin-catalog-detail--rail .plugin-catalog-detail__actions {
+    flex: none;
+  }
+
+  .settings-page.oc-app-surface
+    .sw-detail--skill
+    .plugin-catalog-detail--rail
+    .plugin-catalog-detail__actions
+    > .btn {
+    flex: none;
+    width: auto;
+    height: 36px;
+    min-height: 36px;
+    padding: 0 14px;
   }
 }

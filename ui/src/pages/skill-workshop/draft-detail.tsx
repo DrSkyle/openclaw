@@ -49,6 +49,7 @@ export function DraftDetail(props: {
     <Show when={draft()}>
       {(current) => (
         <WorkshopDetailShell
+          kind="draft"
           view={props.view}
           page={props.page}
           name={target().name}

@@ -1,8 +1,9 @@
 import { createUniqueId, Show } from "solid-js";
 import { Icon } from "../../components/solid/icon.tsx";
 import { Popover } from "../../components/solid/popover.tsx";
-import { SettingsSegmented } from "../../components/solid/settings-ui.tsx";
+import { LearnMoreLink, SettingsSegmented } from "../../components/solid/settings-ui.tsx";
 import { t } from "../../lib/reactive/i18n.ts";
+import { PLUGINS_HUB_DOCS_URLS } from "../plugins/plugins-hub.ts";
 import type { SkillWorkshopMode } from "./mode.ts";
 import type { WorkshopView } from "./view-shared.tsx";
 
@@ -80,6 +81,10 @@ export function LearningControl(props: { view: WorkshopView }) {
             <Icon name="wandSparkles" />
           </span>
         </button>
+        {/* On a phone the subtitle row holds the learning state, so its docs link moves here. */}
+        <div class="sw-learning-menu__docs">
+          <LearnMoreLink url={PLUGINS_HUB_DOCS_URLS["skill-workshop"]} />
+        </div>
       </Popover>
     </div>
   );

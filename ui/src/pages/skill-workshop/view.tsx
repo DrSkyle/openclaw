@@ -507,12 +507,16 @@ function SkillRow(props: { skill: SkillRowEntry; view: WorkshopView; page: Works
             fallback={
               <>
                 {live()?.description && <span class="sw-row__desc">{live()?.description}</span>}
-                <Show when={change()}>
-                  {(value) => (
-                    <span class="sw-row__change">
-                      <WorkshopChangeText change={value()} prefix="sw-row__change-" />
-                    </span>
-                  )}
+                {/* On a phone the uses move into this last line; the right slot keeps Undo. */}
+                <Show when={change() || unused() === null}>
+                  <span class={["sw-row__change", { "sw-row__change--uses-only": !change() }]}>
+                    <Show when={unused() === null}>
+                      <span class="sw-row__change-uses">{renderUses(live()?.useCount)}</span>
+                    </Show>
+                    <Show when={change()}>
+                      {(value) => <WorkshopChangeText change={value()} prefix="sw-row__change-" />}
+                    </Show>
+                  </span>
                 </Show>
               </>
             }
@@ -539,7 +543,7 @@ function SkillRow(props: { skill: SkillRowEntry; view: WorkshopView; page: Works
               {t("skillWorkshop.unused.badge", { days: String(unused()) })}
             </span>
           ) : (
-            <span class="sw-row__uses">{renderUses(live()?.useCount)}</span>
+            <span class="sw-row__uses sw-row__uses--aside">{renderUses(live()?.useCount)}</span>
           )}
           <Show when={undo()}>
             {(mutation) => (
@@ -635,9 +639,10 @@ function DraftRow(props: {
             })}
           </span>
         </button>
-        <Show when={!open()}>
-          <div class="sw-row__aside sw-row__aside--closed">{actions()}</div>
-        </Show>
+        {/* The slot stays when the row is open so every row's time ends at the same edge. */}
+        <div class="sw-row__aside sw-row__aside--draft">
+          <Show when={!open()}>{actions()}</Show>
+        </div>
       </div>
       <Show when={open()}>
         <div class="sw-row__body" id={bodyId}>
