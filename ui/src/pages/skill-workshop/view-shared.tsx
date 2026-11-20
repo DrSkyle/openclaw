@@ -179,6 +179,9 @@ export type WorkshopReads = {
   viewer: () => WorkshopViewerResult | null;
 };
 
+/** The start page lists skills; `open` shows the selected skill or draft as its own page. */
+export type WorkshopPage = { open: () => void; close: () => void };
+
 export type WorkshopFilter = "active" | "drafts" | "archived";
 export type WorkshopSort = "uses" | "recent" | "name";
 export type WorkshopTab = "instructions" | "files" | "history";
