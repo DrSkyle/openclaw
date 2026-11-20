@@ -54,6 +54,7 @@ import {
   captureGatewayOperatorRunAuthority,
   intersectOperatorRunModelPolicy,
 } from "./operator-run-authority.js";
+import { retainGatewayOperatorInvocation } from "./operator-run-invocation.js";
 import {
   decodeQueuedOperatorRecoverySource,
   hasAutomationAdminDelegation,
@@ -592,11 +593,14 @@ export async function captureGatewayOperatorContinuation(
     scopes: intersectOperatorScopes(restored.authority.scopes, input.client?.connect.scopes ?? []),
   });
   bindGatewayDeviceRevocation(authority.assertCurrent, inherited.assertCurrent);
-  return {
-    authority,
-    release: () => {
-      restored.release();
-      releaseInherited?.();
+  return retainGatewayOperatorInvocation(
+    {
+      authority,
+      release: () => {
+        restored.release();
+        releaseInherited?.();
+      },
     },
-  };
+    input.invocationAuthority,
+  );
 }
