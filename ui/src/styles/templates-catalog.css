@@ -654,3 +654,10 @@ openclaw-templates-detail-view .plugin-capabilities .settings-row__text {
     line-height: 1.6;
   }
 }
+
+/* An automation's prompt opens under its row, aligned with the row text. */
+openclaw-templates-detail-view .plugin-capability__details > .template-automation-message {
+  margin: -4px 0 0 50px;
+  color: var(--text);
+  line-height: 1.55;
+}

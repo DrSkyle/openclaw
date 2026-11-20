@@ -1,7 +1,5 @@
-import { createMemo, createSignal, Errored, For, Loading, Show } from "solid-js";
+import { createMemo, Errored, For, Loading, Show } from "solid-js";
 import { pathForRoute } from "../../app-route-paths.ts";
-import { ModalDialog } from "../../components/modal-dialog.tsx";
-import { DialogHeader } from "../../components/solid/dialog-header.tsx";
 import { Icon } from "../../components/solid/icon.tsx";
 import { InlineAlert } from "../../components/solid/inline-alert.tsx";
 import { SettingsPage } from "../../components/solid/settings-ui.tsx";
@@ -97,9 +95,6 @@ function renderTemplateTrustWarning(warning: string) {
 function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
   const contents = () => props.view.readDetail()!.contents;
   const automationSummary = createTemplateAutomationSummary();
-  const [automation, setAutomation] = createSignal<
-    TemplateCatalogDetail["contents"]["automations"][number] | null
-  >(null);
   // SOUL.md reads as the Template's personality; the other files stay in the file list.
   const soul = createMemo(() =>
     contents().instructions.find((file) => file.name === "SOUL.md" && file.excerpt),
@@ -180,33 +175,13 @@ function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
         contents().automations.map((item) => ({
           name: item.name,
           description: automationSummary(item),
-          onOpen: () => setAutomation(item),
+          // The prompt opens in place under its row.
+          details: <p class="template-automation-message">{item.message}</p>,
         })),
         () => (
           <Icon name="clock" />
         ),
       )}
-      <Show when={automation()}>
-        {(item) => (
-          <ModalDialog label={item().name} open onModal-cancel={() => setAutomation(null)}>
-            <article class="oc-dialog">
-              <DialogHeader
-                title={
-                  <>
-                    <span class="plugin-capability__icon" aria-hidden="true">
-                      <Icon name="clock" />
-                    </span>
-                    {item().name}
-                  </>
-                }
-                description={automationSummary(item())}
-                onClose={() => setAutomation(null)}
-              />
-              <div class="oc-dialog__body template-automation-message">{item().message}</div>
-            </article>
-          </ModalDialog>
-        )}
-      </Show>
     </>
   );
 }
