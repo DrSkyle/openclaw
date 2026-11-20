@@ -34,7 +34,11 @@ export function renderPluginDetailBreadcrumb(props: {
 }
 
 /** Detail pages clamp a long text inside its surface, with the chat message's Show more toggle. */
-export function PluginReadmeWell(props: { children: JSX.Element }): JSX.Element {
+export function PluginReadmeWell(props: {
+  children: JSX.Element;
+  /** Told when the reader opens or closes the whole text. */
+  onToggle?: (expanded: boolean) => void;
+}): JSX.Element {
   let body!: HTMLDivElement;
   let well!: HTMLDivElement;
   const [expanded, setExpanded] = createSignal(false);
@@ -67,7 +71,11 @@ export function PluginReadmeWell(props: { children: JSX.Element }): JSX.Element 
         hidden={!overflows()}
         aria-expanded={expanded() ? "true" : "false"}
         aria-controls={bodyId}
-        onClick={() => setExpanded((value) => !value)}
+        onClick={() => {
+          const next = !expanded();
+          setExpanded(next);
+          props.onToggle?.(next);
+        }}
       >
         {t(expanded() ? "chat.messages.showLess" : "chat.messages.showMore")}
         <Icon name={expanded() ? "chevronUp" : "chevronDown"} />

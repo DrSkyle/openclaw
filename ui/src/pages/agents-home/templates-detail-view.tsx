@@ -1,7 +1,9 @@
-import { createMemo, Errored, For, Loading, Show } from "solid-js";
+import { createMemo, createSignal, Errored, For, Loading, Show } from "solid-js";
 import { pathForRoute } from "../../app-route-paths.ts";
+import { toSanitizedMarkdownHtml } from "../../components/markdown.ts";
 import { Icon } from "../../components/solid/icon.tsx";
 import { InlineAlert } from "../../components/solid/inline-alert.tsx";
+import { SanitizedHtml } from "../../components/solid/sanitized-html.tsx";
 import { SettingsPage } from "../../components/solid/settings-ui.tsx";
 import { t } from "../../i18n/index.ts";
 import { formatUiError } from "../../lib/format-error.ts";
@@ -19,6 +21,7 @@ import { TemplateArtwork } from "./template-artwork.tsx";
 import { createTemplateAutomationSummary } from "./template-automation-summary.ts";
 import { TemplatePluginIcon } from "./template-plugin-icon.tsx";
 import type { TemplateCatalogDetail, TemplateCatalogEntry } from "./templates-catalog-client.ts";
+import "../../styles/sidebar-markdown.css";
 import "../../styles/templates-catalog.css";
 import type { TemplatesCatalogViewProps } from "./templates-catalog-view-props.ts";
 import { TemplateWorkspaceFiles } from "./templates-workspace-files.tsx";
@@ -92,6 +95,104 @@ function renderTemplateTrustWarning(warning: string) {
   );
 }
 
+type SoulRead =
+  | { state: "loading" }
+  | { state: "ready"; html: string }
+  | { state: "error"; message: string };
+
+/** The excerpt previews the soul; Show more reads the whole SOUL.md, formatted. */
+function TemplatePersonality(props: {
+  view: TemplatesCatalogViewProps;
+  name: string;
+  excerpt: string;
+}) {
+  const [expanded, setExpanded] = createSignal(false);
+  const [read, setRead] = createSignal<SoulRead>();
+  // Only the latest read may settle; a keyed parent remounts this for another release.
+  let attempt = 0;
+  const load = () => {
+    const reader = props.view.readInstruction;
+    if (!reader) {
+      return;
+    }
+    const current = ++attempt;
+    setRead({ state: "loading" });
+    reader(props.name).then(
+      (text) => {
+        if (current === attempt) {
+          setRead({
+            state: "ready",
+            html: toSanitizedMarkdownHtml(text, { mode: "document" })
+              .replaceAll("<h1", "<h2")
+              .replaceAll("</h1>", "</h2>"),
+          });
+        }
+      },
+      (error: unknown) => {
+        if (current === attempt) {
+          setRead({
+            state: "error",
+            message: formatUiError(error, t("templatesCatalog.unavailable")),
+          });
+        }
+      },
+    );
+  };
+  const value = () => (expanded() ? read() : undefined);
+  const ready = () => {
+    const current = value();
+    return current?.state === "ready" ? current : undefined;
+  };
+  const failure = () => {
+    const current = value();
+    return current?.state === "error" ? current : undefined;
+  };
+  return (
+    <PluginReadmeWell
+      onToggle={(open) => {
+        setExpanded(open);
+        if (open && (!read() || read()?.state === "error")) {
+          load();
+        }
+      }}
+    >
+      <Show
+        when={ready()}
+        fallback={
+          <>
+            <p class="templates-personality__text">{props.excerpt}</p>
+            <Show when={value()?.state === "loading"}>
+              <p class="templates-personality__status" role="status">
+                {t("common.loading")}
+              </p>
+            </Show>
+            <Show when={failure()}>
+              {(current) => (
+                <p class="templates-personality__status" role="alert">
+                  {current().message}
+                  <button type="button" class="btn btn--sm" onClick={load}>
+                    {t("templatesCatalog.retry")}
+                  </button>
+                </p>
+              )}
+            </Show>
+          </>
+        }
+      >
+        {(current) => (
+          <article class="templates-personality__markdown sidebar-markdown">
+            <SanitizedHtml
+              html={current().html}
+              class="lit-content"
+              style={{ display: "contents" }}
+            />
+          </article>
+        )}
+      </Show>
+    </PluginReadmeWell>
+  );
+}
+
 function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
   const contents = () => props.view.readDetail()!.contents;
   const automationSummary = createTemplateAutomationSummary();
@@ -101,7 +202,7 @@ function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
   );
   return (
     <>
-      <Show when={soul()}>
+      <Show when={soul()} keyed>
         {(file) => (
           <section class="plugin-catalog-detail__readme-section templates-personality">
             <div class="templates-personality__label">
@@ -111,14 +212,12 @@ function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
               <button
                 type="button"
                 class="templates-personality__file"
-                onClick={() => props.view.onOpenPreview("instruction", file().name)}
+                onClick={() => props.view.onOpenPreview("instruction", file.name)}
               >
-                {file().name}
+                {file.name}
               </button>
             </div>
-            <PluginReadmeWell>
-              <p class="templates-personality__text">{file().excerpt}</p>
-            </PluginReadmeWell>
+            <TemplatePersonality view={props.view} name={file.name} excerpt={file.excerpt ?? ""} />
           </section>
         )}
       </Show>
