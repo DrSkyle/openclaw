@@ -33,8 +33,8 @@ export function renderPluginDetailBreadcrumb(props: {
   );
 }
 
-/** Plugin pages clamp a long README inside its surface, with the chat message's Show more toggle. */
-function PluginReadmeWell(props: { children: JSX.Element }): JSX.Element {
+/** Detail pages clamp a long text inside its surface, with the chat message's Show more toggle. */
+export function PluginReadmeWell(props: { children: JSX.Element }): JSX.Element {
   let body!: HTMLDivElement;
   let well!: HTMLDivElement;
   const [expanded, setExpanded] = createSignal(false);
