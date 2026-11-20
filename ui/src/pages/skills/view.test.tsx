@@ -682,7 +682,7 @@ describe("renderSkills", () => {
         ?.getAttribute("aria-label"),
     ).toBe("Full security report");
     expect(query(".skill-page .sidebar-markdown")).toBeNull();
-    findButton(container, "Show more")?.click();
+    findButton(container, "Skill card")?.click();
     expect(onDetailTabChange).toHaveBeenCalledWith("card");
 
     render({

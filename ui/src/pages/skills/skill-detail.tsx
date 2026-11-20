@@ -395,9 +395,7 @@ export function SkillDetail(props: {
               )}
             </Show>
             <Show when={props.skill.skillCard?.present}>
-              <SkillPageSection title={t("skillsPage.skillCard")}>
-                <InstalledSkillCard skill={props.skill} view={props.view} />
-              </SkillPageSection>
+              <InstalledSkillCard skill={props.skill} view={props.view} />
             </Show>
           </div>
           <dl class="plugin-metadata__facts plugin-metadata__facts--rail skill-page__facts">
@@ -553,39 +551,42 @@ function InstalledSkillCard(props: { skill: SkillStatusEntry; view: SkillsProps 
     <Show
       when={requested() || acceptedContent() !== undefined}
       fallback={
-        <div class="plugin-catalog-detail__readme-well skill-page__card-closed">
-          <button
-            type="button"
-            class="plugin-catalog-detail__readme-toggle"
-            aria-expanded="false"
-            onClick={() => props.view.onDetailTabChange("card")}
-          >
-            {t("chat.messages.showMore")}
-            <Icon name="chevronDown" />
-          </button>
-        </div>
+        // Unread, the card is one row that names it; opening it reads the card in place.
+        <button
+          type="button"
+          class="skill-page__card-row"
+          aria-expanded="false"
+          onClick={() => props.view.onDetailTabChange("card")}
+        >
+          <span>{t("skillsPage.skillCard")}</span>
+          <Icon name="chevronDown" />
+        </button>
       }
     >
-      <Loading
-        on={acceptedContent() === undefined ? completion() : null}
-        fallback={
-          <div class="plugin-catalog-detail__readme-well">
-            <div class="muted" role="status">
-              {t("skillsPage.loadingSkillCard")}
+      <SkillPageSection title={t("skillsPage.skillCard")}>
+        <Loading
+          on={acceptedContent() === undefined ? completion() : null}
+          fallback={
+            <div class="plugin-catalog-detail__readme-well">
+              <div class="muted" role="status">
+                {t("skillsPage.loadingSkillCard")}
+              </div>
             </div>
-          </div>
-        }
-      >
-        <Errored
-          fallback={(error) => (
-            <InlineAlert tone="danger" role="alert">
-              {formatUiError(error())}
-            </InlineAlert>
-          )}
+          }
         >
-          <CardContent />
-        </Errored>
-      </Loading>
+          <Errored
+            fallback={(error) => (
+              <div class="plugin-catalog-detail__readme-well">
+                <InlineAlert tone="danger" role="alert">
+                  {formatUiError(error())}
+                </InlineAlert>
+              </div>
+            )}
+          >
+            <CardContent />
+          </Errored>
+        </Loading>
+      </SkillPageSection>
     </Show>
   );
 }

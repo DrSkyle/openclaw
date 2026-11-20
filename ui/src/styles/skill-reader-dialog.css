@@ -247,12 +247,39 @@
   font-weight: 500;
 }
 
-.skill-page__card-closed {
-  padding-block: 12px 14px;
+/* An unread skill card is one tonal row that names it, opened in place. */
+.skill-page__card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  min-height: 52px;
+  padding: 0 18px 0 20px;
+  border: 0;
+  border-radius: calc(16px * var(--openclaw-corner-radius-scale));
+  background: var(--plugin-detail-tone);
+  color: var(--text-strong);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  text-align: start;
 }
 
-.skill-page__card-closed > .plugin-catalog-detail__readme-toggle {
-  margin-top: 0;
+.skill-page__card-row:hover {
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+}
+
+.skill-page__card-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.skill-page__card-row svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  color: var(--muted);
 }
 
 /* Requirements: the page's standard rows; the right slot holds the state or the thing to do. */
@@ -492,11 +519,17 @@ dl.skill-page__facts {
     font-size: 19px;
   }
 
-  /* Actions take the row under the name, aligned with it; Close keeps the corner. */
+  /* The name and its byline already fill the row at phone width, so the actions take their
+     own row across the dialog's content width: the label at the left, the switch at the right. */
   .skill-page__actions {
     order: 1;
     flex: 1 1 100%;
-    padding-inline-start: 60px;
+    margin-inline-end: calc(var(--overlay-modal-padding) - 12px);
+  }
+
+  .skill-page__actions > .plugin-catalog-detail__enabled {
+    flex: 1 1 auto;
+    justify-content: space-between;
   }
 
   .oc-dialog.skill-page .skill-page__actions .btn.skill-page__cta {

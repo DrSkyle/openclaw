@@ -202,4 +202,9 @@
     flex-wrap: wrap;
     row-gap: 0;
   }
+
+  /* The state is the row's last line, on the text column's edge, not under the tile. */
+  .skill-inventory-row > .settings-row__control {
+    margin-inline-start: 50px;
+  }
 }
