@@ -28,7 +28,6 @@ import "../../styles/skill-workshop.css";
 import { resolveScrollBehavior } from "../../lib/scroll-behavior.ts";
 import { PluginsHubHeader } from "../plugins/plugins-hub-header.tsx";
 import { PLUGINS_HUB_PANEL_ID, pluginsHubPanel } from "../plugins/plugins-hub.ts";
-import { undoMutationFor } from "./api.ts";
 import { Detail } from "./detail.tsx";
 import { DraftContent, DraftDetail } from "./draft-detail.tsx";
 import { LearningControl } from "./learning-control.tsx";
@@ -486,10 +485,6 @@ function SkillRow(props: { skill: SkillRowEntry; view: WorkshopView; page: Works
     const skill = live();
     return skill ? unusedDays(skill, change(), props.view().mode) : null;
   };
-  const undo = () => {
-    const value = change();
-    return value ? undoMutationFor(value, props.view().snapshot!.list) : null;
-  };
   return (
     <div class="sw-row">
       <button
@@ -508,7 +503,7 @@ function SkillRow(props: { skill: SkillRowEntry; view: WorkshopView; page: Works
             fallback={
               <>
                 {live()?.description && <span class="sw-row__desc">{live()?.description}</span>}
-                {/* On a phone the uses move into this last line; the right slot keeps Undo. */}
+                {/* On a phone the uses move into this last line; the right slot keeps the Unused badge. */}
                 <Show when={change() || unused() === null}>
                   <span class={["sw-row__change", { "sw-row__change--uses-only": !change() }]}>
                     <Show when={unused() === null}>
@@ -546,17 +541,6 @@ function SkillRow(props: { skill: SkillRowEntry; view: WorkshopView; page: Works
           ) : (
             <span class="sw-row__uses sw-row__uses--aside">{renderUses(live()?.useCount)}</span>
           )}
-          <Show when={undo()}>
-            {(mutation) => (
-              <MutationButton
-                view={props.view}
-                label={t("skillWorkshop.changes.undo")}
-                title={t("skillWorkshop.changes.undoTitle", { name: props.skill.name })}
-                mutation={mutation()}
-                actionKey={`undo:${change()!.id}`}
-              />
-            )}
-          </Show>
         </div>
       </Show>
     </div>
