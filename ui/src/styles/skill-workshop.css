@@ -161,6 +161,11 @@
   gap: var(--space-2);
 }
 
+/* Archived has no Sort and one active agent has no picker: no empty row or gap. */
+.sw-library__tools:empty {
+  display: none;
+}
+
 .sw-sort .settings-select {
   min-height: 32px;
   padding-block: 2px;
