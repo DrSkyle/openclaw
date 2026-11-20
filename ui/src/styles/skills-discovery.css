@@ -15,8 +15,8 @@
   white-space: nowrap;
 }
 
-/* A skill's mark: its image or emoji on the card surface; the default icon stays quiet so a
-   list of skills without their own mark does not read as a wall of the same glyph. */
+/* A skill's mark always sits on the same quiet tonal tile, its own emoji or image included, at
+   about 60% of the tile; the default icon is only dimmer so a list of them stays quiet. */
 .skill-tile {
   display: grid;
   flex: none;
@@ -25,14 +25,20 @@
   height: 40px;
   overflow: hidden;
   border-radius: calc(10px * var(--openclaw-corner-radius-scale));
-  background: var(--card);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text) 6%, transparent);
+  background: color-mix(in srgb, var(--text) 4.5%, transparent);
   color: var(--muted-strong);
-  font-size: 20px;
+  font-size: 24px;
   line-height: 1;
 }
 
 .skill-tile > img {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+}
+
+/* A publisher's profile picture is a photo, so it fills its round tile. */
+.skill-tile--profile > img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -44,8 +50,6 @@
 }
 
 .skill-tile--default {
-  background: color-mix(in srgb, var(--text) 4.5%, transparent);
-  box-shadow: none;
   color: color-mix(in srgb, var(--text) 42%, transparent);
 }
 
@@ -93,16 +97,14 @@
   width: 32px;
   height: 32px;
   margin-inline-start: -8px;
+  /* Opaque, so overlapping tiles never show through each other; the ring separates them. */
+  background: color-mix(in srgb, var(--text) 5%, var(--card));
   box-shadow: 0 0 0 2.5px var(--card);
-  font-size: 17px;
+  font-size: 19px;
 }
 
 .skill-installed-shelf__stack > .skill-tile:first-child {
   margin-inline-start: 0;
-}
-
-.skill-installed-shelf__stack > .skill-tile--default {
-  background: color-mix(in srgb, var(--text) 5%, var(--card));
 }
 
 .skill-installed-shelf__stack svg {
@@ -158,7 +160,7 @@
 .skill-inventory-row > .skill-tile {
   width: 36px;
   height: 36px;
-  font-size: 18px;
+  font-size: 22px;
 }
 
 .skill-inventory-row .settings-row__title {

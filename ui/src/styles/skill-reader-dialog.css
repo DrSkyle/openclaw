@@ -139,7 +139,7 @@
   width: 56px;
   height: 56px;
   border-radius: calc(16px * var(--openclaw-corner-radius-scale));
-  font-size: 28px;
+  font-size: 34px;
 }
 
 .skill-page__tile.skill-tile svg {
@@ -512,7 +512,7 @@ dl.skill-page__facts {
     width: 48px;
     height: 48px;
     border-radius: calc(14px * var(--openclaw-corner-radius-scale));
-    font-size: 24px;
+    font-size: 29px;
   }
 
   .oc-dialog.skill-page .skill-page__identity .oc-dialog__title {
