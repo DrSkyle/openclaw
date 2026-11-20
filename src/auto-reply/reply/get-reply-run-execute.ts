@@ -412,6 +412,7 @@ export async function executePreparedReplyRun(
         })
       : undefined;
   const followupRun = {
+    disableCollectBatching: Boolean(opts?.participationCeiling),
     createChannelCronAuthority,
     prompt: queuedBody,
     readAdmissionConfig,
@@ -533,7 +534,10 @@ export async function executePreparedReplyRun(
         command.senderIsOwner || (ctx.GatewayClientScopes ?? []).includes("operator.admin"),
       traceLevelOverride: params.directives.traceLevel,
       verboseLevelOverride: params.directives.verboseLevel,
-      approvalReviewerDeviceId: normalizeOptionalString(ctx.ApprovalReviewerDeviceId),
+      participationCeiling: opts?.participationCeiling,
+      approvalReviewerDeviceId: opts?.participationCeiling
+        ? undefined
+        : normalizeOptionalString(ctx.ApprovalReviewerDeviceId),
       sessionFile: preparedSessionState.sessionFile,
       workspaceDir,
       cwd:
@@ -678,9 +682,11 @@ export async function executePreparedReplyRun(
       transcriptCommandBody,
       followupRun,
       queueKey,
-      resolvedQueue,
-      shouldSteer,
-      shouldFollowup,
+      resolvedQueue: opts?.participationCeiling
+        ? { ...resolvedQueue, mode: "followup" }
+        : resolvedQueue,
+      shouldSteer: opts?.participationCeiling ? false : shouldSteer,
+      shouldFollowup: opts?.participationCeiling ? true : shouldFollowup,
       hasQueuedFollowups,
       isActive,
       isRunActive,

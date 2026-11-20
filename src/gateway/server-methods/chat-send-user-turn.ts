@@ -157,6 +157,7 @@ export function prepareChatSendUserTurn(params: {
   request: Pick<
     NormalizedChatSendRequest,
     | "clientInfo"
+    | "participationCeiling"
     | "inboundMessage"
     | "suppressCommandInterpretation"
     | "systemInputProvenance"
@@ -220,10 +221,10 @@ export function prepareChatSendUserTurn(params: {
   void pluginBoundMediaPromise.catch(() => undefined);
   // Generated media hints belong to the prompt and reset payload, not command arguments.
   const commandBody = request.inboundMessage;
+  const suppressCommands =
+    request.suppressCommandInterpretation || Boolean(request.participationCeiling);
   const commandSource =
-    !request.suppressCommandInterpretation && commandBody.trim().startsWith("/")
-      ? "text"
-      : undefined;
+    !suppressCommands && commandBody.trim().startsWith("/") ? "text" : undefined;
   const buildTextContext = (text: string) => {
     // The attachment parser appends managed-media hints after the original input.
     const parsedMessage =
@@ -269,7 +270,7 @@ export function prepareChatSendUserTurn(params: {
     AccountId: accountId,
     MessageThreadId: messageThreadId,
     ...(commandSource ? { CommandSource: commandSource } : {}),
-    CommandAuthorized: !request.suppressCommandInterpretation,
+    CommandAuthorized: !suppressCommands,
     CommandTurn: commandSource
       ? {
           kind: "text-slash",
@@ -283,13 +284,16 @@ export function prepareChatSendUserTurn(params: {
           authorized: false,
           body: commandBody,
         },
-    ...(request.suppressCommandInterpretation ? { CommandInterpretationSuppressed: true } : {}),
+    ...(suppressCommands ? { CommandInterpretationSuppressed: true } : {}),
     MessageSid: session.clientRunId,
     SessionCreation: { ...creation, ...(sandbox ? { sandbox } : {}) },
     ...resolveChatSendCallerContext(client, request.clientInfo, originatingChannel),
     GatewayRunToolBindings: request.toolBindings,
     GatewayUiCommandTarget: gatewayUiCommandTarget,
   };
+  if (request.participationCeiling) {
+    delete ctx.ApprovalReviewerDeviceId;
+  }
   const recoveredRequester = readQueuedChatInputAdmission(session.clientRunId)?.requesterProfile;
   const requester = client?.authenticatedUserProfile;
   const externalInput =

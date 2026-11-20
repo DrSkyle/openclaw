@@ -299,6 +299,7 @@ export function createGatewayChatUserTurnController(params: {
       if (originalInput && next?.role === "user") {
         const userMessage: PersistedUserTurnMessage = next;
         const metadata = { ...asOptionalRecord(Reflect.get(next, "__openclaw")) };
+        delete metadata.participationCeiling;
         delete metadata.chatRequestIdentity;
         delete metadata.suppressCommandInterpretation;
         delete metadata.chatSendDelivery;
@@ -316,7 +317,10 @@ export function createGatewayChatUserTurnController(params: {
           __openclaw: {
             ...metadata,
             ...(request.requestIdentity ? { chatRequestIdentity: request.requestIdentity } : {}),
-            ...(request.suppressCommandInterpretation
+            ...(request.participationCeiling
+              ? { participationCeiling: request.participationCeiling }
+              : {}),
+            ...(request.suppressCommandInterpretation || request.participationCeiling
               ? { suppressCommandInterpretation: true }
               : {}),
             ...(request.p.deliver !== undefined || request.explicitOrigin

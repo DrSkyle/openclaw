@@ -216,7 +216,7 @@ export async function admitChatSend(params: ChatSendAdmissionParams) {
       cfg,
       channel: originatingRoute.originatingChannel,
       sessionEntry: entry,
-      inlineMode: p.queueMode,
+      inlineMode: request.participationCeiling ? "followup" : p.queueMode,
     }),
     authority: { assertCurrent: () => assertSourceAuthority?.() },
     runId: clientRunId,
@@ -357,7 +357,7 @@ export async function admitChatSend(params: ChatSendAdmissionParams) {
           // Retain original opaque targets, including absence, across placement waits.
           // A message to people never steers the active run.
           messageInjectionTarget =
-            p.queueMode === "steer" && !request.humanAddressed
+            p.queueMode === "steer" && !request.humanAddressed && !request.participationCeiling
               ? captureCurrentReplyMessageInjectionTarget(
                   admittedRunAbort.entry?.input.mailbox.owner.id ?? activeRunScopeKey,
                 )
