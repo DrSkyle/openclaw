@@ -37,6 +37,7 @@ export type ApplyPatchFileOptions = {
   sandbox?: SandboxApplyPatchConfig;
   /** Restrict patch paths to the workspace root (cwd). Host default: false; sandbox default: true. */
   workspaceOnly?: boolean;
+  strictWorkspaceRoot?: boolean;
   memoryWriteProvenance?: MemoryWriteProvenanceObserver;
 };
 
@@ -148,7 +149,11 @@ export async function resolvePatchFileOps(options: ApplyPatchFileOptions): Promi
   const initialRoot = await fsRoot(containmentRoot, { assertBeforeMutation: assertCurrent });
   const roots = new Map([[path.resolve(containmentRoot), initialRoot]]);
   const resolveTarget = async (filePath: string) => {
-    const selectedRoot = await resolveHostRootAsync(containmentRoot, filePath);
+    const selectedRoot = await resolveHostRootAsync(
+      containmentRoot,
+      filePath,
+      options.strictWorkspaceRoot,
+    );
     const relative = toRelativeSandboxPath(selectedRoot, filePath);
     let root = roots.get(selectedRoot);
     if (!root) {
@@ -157,7 +162,10 @@ export async function resolvePatchFileOps(options: ApplyPatchFileOptions): Promi
     }
     const assertBeforeMutation = () => {
       assertCurrent();
-      toRelativeSandboxPath(resolveHostWorkspaceRoot(containmentRoot, filePath), filePath);
+      toRelativeSandboxPath(
+        resolveHostWorkspaceRoot(containmentRoot, filePath, options.strictWorkspaceRoot),
+        filePath,
+      );
     };
     return { root, relative, assertBeforeMutation };
   };
@@ -166,7 +174,11 @@ export async function resolvePatchFileOps(options: ApplyPatchFileOptions): Promi
   return withPatchMemoryWriteProvenance(options.memoryWriteProvenance, {
     readFile: (filePath) =>
       runWithAgentToolSourceExecutionScope(assertCurrent, async () => {
-        const selectedRoot = await resolveHostRootAsync(containmentRoot, filePath);
+        const selectedRoot = await resolveHostRootAsync(
+          containmentRoot,
+          filePath,
+          options.strictWorkspaceRoot,
+        );
         const opened = await openRootFile({
           absolutePath: filePath,
           rootPath: selectedRoot,
