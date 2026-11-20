@@ -348,10 +348,12 @@ function Library(props: { view: WorkshopView; reads: WorkshopReads; page: Worksh
       }
       fallback={
         <>
-          <div class="sw-library__bar">
-            <span />
-            <AgentScope view={props.view} />
-          </div>
+          <Show when={props.view().allAgentsScope}>
+            <div class="sw-library__bar">
+              <span />
+              <AgentScope view={props.view} />
+            </div>
+          </Show>
           <div class="sw-empty oc-settings-group settings-group">
             <span class="sw-empty__icon" aria-hidden="true">
               <Icon name="wandSparkles" />
@@ -400,7 +402,9 @@ function Library(props: { view: WorkshopView; reads: WorkshopReads; page: Worksh
                 </select>
               </label>
             )}
-            <AgentScope view={props.view} />
+            <Show when={props.view().allAgentsScope}>
+              <AgentScope view={props.view} />
+            </Show>
           </div>
         </div>
         <Show
@@ -450,6 +454,7 @@ function Library(props: { view: WorkshopView; reads: WorkshopReads; page: Worksh
   );
 }
 
+/** The workshop follows the active agent; the picker shows only in the sidebar's Show All mode. */
 function AgentScope(props: { view: WorkshopView }) {
   return (
     <AgentScopeControl
