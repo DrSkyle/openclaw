@@ -301,7 +301,7 @@
 
 /* One right slot per row: every row's text ends at the same line, the slot at the column edge. */
 .sw-grid .sw-row__aside {
-  width: 164px;
+  width: 104px;
 }
 
 .sw-row__aside--draft {

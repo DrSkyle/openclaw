@@ -205,6 +205,9 @@ it.each([
   const request = gateway({}, [{ ...change, versionId, action }]);
   const page = await mount(request, { ...mutationAccess, scopes: [...scopes] });
   await waitText(page, change.summary);
+  // Undo is managed on the skill's own page, never on the list row.
+  expect(button(page, "Undo")).toBeNull();
+  await openSkill(page, SKILL);
   if (action === "restore") {
     await click(page, "Undo");
     await waitForSolid(() =>
