@@ -23,7 +23,6 @@ import { TemplatePluginIcon } from "./template-plugin-icon.tsx";
 import type { TemplateCatalogDetail, TemplateCatalogEntry } from "./templates-catalog-client.ts";
 import "../../styles/templates-catalog.css";
 import type { TemplatesCatalogViewProps } from "./templates-catalog-view-props.ts";
-import { TemplateWorkspaceFiles } from "./templates-workspace-files.tsx";
 
 type ClawHubAudit = {
   release: string;
@@ -100,7 +99,7 @@ function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
   const [automation, setAutomation] = createSignal<
     TemplateCatalogDetail["contents"]["automations"][number] | null
   >(null);
-  // SOUL.md reads as the Template's personality; the other files stay in the file list.
+  // SOUL.md reads as the Template's personality; the page lists no other workspace files.
   const soul = createMemo(() =>
     contents().instructions.find((file) => file.name === "SOUL.md" && file.excerpt),
   );
@@ -127,12 +126,6 @@ function TemplateContents(props: { view: TemplatesCatalogViewProps }) {
           </section>
         )}
       </Show>
-      <TemplateWorkspaceFiles
-        files={contents().instructions.filter((file) => file !== soul())}
-        onOpen={(name) =>
-          props.view.onOpenPreview("instruction", name ?? contents().instructions[0]!.name)
-        }
-      />
       {renderPluginCapabilitySection(
         t("templatesCatalog.skillsSection"),
         contents().skills.map((item) => ({
