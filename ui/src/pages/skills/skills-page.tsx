@@ -528,6 +528,11 @@ export function SkillsPage(props: SkillsPageProps) {
     if (key) {
       // The dialog needs the stored API key's source; read config only once one opens.
       void context.runtimeConfig.ensureDisplayLoaded();
+      // The dialog opens on the status it already has; its skill card reads on its own, and the
+      // card owner drops a response from another agent, connection or card revision.
+      if (data.skillsReport?.skills.some((skill) => skill.skillKey === key && skill.skillCard)) {
+        void loadSkillCard(data, key);
+      }
     }
     setLocal((state) => {
       state.skillsDetailKey = key;

@@ -328,3 +328,45 @@ describe("Skills mutation presentation", () => {
     },
   );
 });
+
+describe("Installed skill dialog", () => {
+  it("reads the skill card when the dialog opens, once", async () => {
+    const report = createReport([
+      createSkill({
+        primaryEnv: undefined,
+        skillCard: { present: true, path: "/tmp/skill/skill-card.md", sizeBytes: 12 },
+      }),
+    ]);
+    const request = vi.fn(async (method: string) => {
+      if (method === "skills.skillCard") {
+        return {
+          schema: "openclaw.skills.skill-card.v1",
+          skillKey: "repo-skill",
+          path: "/tmp/skill/skill-card.md",
+          sizeBytes: 12,
+          content: "# Card\n\nOpened with the dialog.",
+        };
+      }
+      if (method === "skills.status") {
+        return report;
+      }
+      if (method === "skills.library.list") {
+        return { ...personalLibrary, defaultTarget: "workspace" };
+      }
+      throw new Error(`Unexpected method: ${method}`);
+    });
+    const { page, publishRouteData } = mountSkills(request, "settings");
+    publishRouteData({ report });
+    await waitForFast(() =>
+      expect(page.querySelector(".plugins-item__detail-button")).not.toBeNull(),
+    );
+    expect(request.mock.calls.some(([method]) => method === "skills.skillCard")).toBe(false);
+    page.querySelector<HTMLButtonElement>(".plugins-item__detail-button")!.click();
+    await waitForFast(() =>
+      expect(page.querySelector(".skill-reader-dialog .sidebar-markdown")?.textContent).toContain(
+        "Opened with the dialog.",
+      ),
+    );
+    expect(request.mock.calls.filter(([method]) => method === "skills.skillCard")).toHaveLength(1);
+  });
+});
