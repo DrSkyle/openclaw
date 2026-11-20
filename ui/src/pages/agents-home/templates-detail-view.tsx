@@ -122,9 +122,7 @@ function TemplatePersonality(props: {
         if (current === attempt) {
           setRead({
             state: "ready",
-            html: toSanitizedMarkdownHtml(text, { mode: "document" })
-              .replaceAll("<h1", "<h2")
-              .replaceAll("</h1>", "</h2>"),
+            html: toSanitizedMarkdownHtml(text, { mode: "document" }),
           });
         }
       },
