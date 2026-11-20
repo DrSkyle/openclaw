@@ -546,6 +546,11 @@ openclaw-templates-detail-view .plugin-capabilities .settings-row__text {
   align-self: center;
 }
 
+/* The excerpt is plain text without its headings: a short preview reads better than a long one. */
+.templates-personality {
+  --plugin-readme-clamp: 96px;
+}
+
 .templates-personality__label {
   display: flex;
   align-items: center;
@@ -556,6 +561,7 @@ openclaw-templates-detail-view .plugin-capabilities .settings-row__text {
   margin: 0;
 }
 .templates-personality__file {
+  position: relative;
   padding: 2px 7px;
   border: 0;
   border-radius: calc(7px * var(--openclaw-corner-radius-scale));
@@ -580,6 +586,25 @@ openclaw-templates-detail-view .plugin-capabilities .settings-row__text {
   line-height: 1.65;
   overflow-wrap: anywhere;
   white-space: pre-line;
+}
+
+/* Every row on the page shares one line: the help button does not make its row taller. */
+.plugin-catalog-detail--rail .templates-workspace-file__info {
+  --art-size: 32px;
+
+  margin-block: -8px;
+}
+
+/* File rows keep the other rows' title line and chevron. */
+.plugin-catalog-detail--rail .templates-workspace-file__title {
+  align-items: center;
+  height: 19px;
+}
+.plugin-catalog-detail--rail .templates-workspace-file .settings-row__chevron {
+  --list-row-icon-size: 15px;
+
+  width: 15px;
+  height: 15px;
 }
 
 /* Rows in the tonal blocks carry no separators. */
@@ -652,6 +677,25 @@ openclaw-templates-detail-view .plugin-capabilities .settings-row__text {
     margin: 16px 0;
     font-size: 14px;
     line-height: 1.6;
+  }
+}
+
+/* Phone: five lines of the personality preview; small text controls keep a finger-sized target. */
+@container (max-width: 560px) {
+  .templates-personality {
+    --plugin-readme-clamp: 120px;
+  }
+
+  .templates-personality__file::after {
+    position: absolute;
+    inset: -7px -4px;
+    content: "";
+  }
+
+  .plugin-catalog-detail--rail .templates-trust-warning a {
+    display: inline-block;
+    margin-block: -7px;
+    padding-block: 7px;
   }
 }
 
