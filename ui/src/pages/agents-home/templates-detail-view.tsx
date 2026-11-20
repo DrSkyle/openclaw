@@ -121,7 +121,7 @@ function TemplatePersonality(props: {
         if (current === attempt) {
           setRead({
             state: "ready",
-            html: toSanitizedMarkdownHtml(text, { mode: "document" }),
+            html: toSanitizedMarkdownHtml(text, { mode: "document", remoteImages: false }),
           });
         }
       },
@@ -146,6 +146,7 @@ function TemplatePersonality(props: {
   };
   return (
     <PluginReadmeWell
+      alwaysExpandable={Boolean(props.view.readInstruction)}
       onToggle={(open) => {
         setExpanded(open);
         if (open && (!read() || read()?.state === "error")) {

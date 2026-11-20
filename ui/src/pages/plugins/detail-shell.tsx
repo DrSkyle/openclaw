@@ -36,6 +36,8 @@ export function renderPluginDetailBreadcrumb(props: {
 /** Detail pages clamp a long text inside its surface, with the chat message's Show more toggle. */
 export function PluginReadmeWell(props: {
   children: JSX.Element;
+  /** The toggle stays available when opening loads a separate full document. */
+  alwaysExpandable?: boolean;
   /** Told when the reader opens or closes the whole text. */
   onToggle?: (expanded: boolean) => void;
 }): JSX.Element {
@@ -68,7 +70,7 @@ export function PluginReadmeWell(props: {
       <button
         type="button"
         class="plugin-catalog-detail__readme-toggle"
-        hidden={!overflows()}
+        hidden={!expanded() && !overflows() && !props.alwaysExpandable}
         aria-expanded={expanded() ? "true" : "false"}
         aria-controls={bodyId}
         onClick={() => {
