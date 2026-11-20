@@ -177,6 +177,7 @@ export function prepareSessionSharing(
     accessForTarget,
     invitedAccessCeiling:
       policy?.sessions.others === "invited" ? policy.sessions.maxInvitedAccess : undefined,
+    invitedTools: policy?.sessions.invitedTools,
     authorizeTarget: (
       target: SessionSharingTarget,
       role = roleForTarget(target),
