@@ -99,6 +99,11 @@ class SkillWorkshopPageState {
         context.gateway.subscribe(sync),
         // Selection receipts abort prior-agent work before another workshop action starts.
         context.agentSelection.subscribe(sync),
+        // Back, Forward and links change which skill or draft page is open.
+        context.router.subscribe(() => {
+          this.followLocation();
+          changed();
+        }),
       ];
       sync();
       return () => {
@@ -166,6 +171,8 @@ class SkillWorkshopPageState {
       if (this.scope !== scope) {
         return null;
       }
+      // The first read for this agent; later reads follow mutations and keep the open page.
+      const first = this.snapshot === null;
       this.snapshot = snapshot;
       const selected = this.viewer?.target;
       if (
@@ -177,20 +184,29 @@ class SkillWorkshopPageState {
       ) {
         this.viewer = null;
       }
-      // A chat notice links here with ?skill=<name>; open it in whichever list holds it.
-      const requested = this.viewer
-        ? null
-        : new URLSearchParams(this.context.router.getState().location.search).get("skill");
+      // A chat notice links here with ?skill=<name>; a draft page is ?draft=<id>. Open the page
+      // in whichever list holds it.
+      const page = this.requestedPage();
+      const requested = this.viewer ? null : (page.skill ?? null);
       const requestedLive = snapshot.list.skills.some((skill) => skill.name === requested);
-      if (
+      if (!this.viewer && page.draft && snapshot.list.drafts?.some((d) => d.id === page.draft)) {
+        this.filter = "drafts";
+        this.selectDraft(page.draft);
+      } else if (
         requested &&
         (requestedLive || snapshot.list.archived.some((skill) => skill.name === requested))
       ) {
         this.filter = requestedLive ? "active" : "archived";
         this.selectSkill(requested);
       } else if (!this.viewer) {
+        // A page link to a skill or draft this agent does not have opens the list instead.
+        if (first && (page.skill || page.draft)) {
+          this.context.replace("skill-workshop", { search: "" });
+        }
         this.selectFirst();
       }
+      // While a page is open its URL follows the selection (a discarded draft's next one).
+      this.syncLocation();
       this.changed();
       return snapshot;
     });
@@ -203,12 +219,76 @@ class SkillWorkshopPageState {
     );
   }
 
+  /** The open skill or draft page, as the URL names it. */
+  private requestedPage(): { skill?: string; draft?: string } {
+    const params = new URLSearchParams(this.context.router.getState().location.search);
+    return { skill: params.get("skill") ?? undefined, draft: params.get("draft") ?? undefined };
+  }
+
+  private pageSearch(target: WorkshopViewerTarget | undefined): string {
+    if (!target) {
+      return "";
+    }
+    return target.draftId
+      ? `?draft=${encodeURIComponent(target.draftId)}`
+      : `?skill=${encodeURIComponent(target.name)}`;
+  }
+
+  /** While a page is open its URL follows the selection (Apply, Discard, Previous / Next). */
+  private syncLocation() {
+    const page = this.requestedPage();
+    if (!this.snapshot || (!page.skill && !page.draft)) {
+      return;
+    }
+    const search = this.pageSearch(this.viewer?.target);
+    if (search !== this.context.router.getState().location.search) {
+      this.context.replace("skill-workshop", { search });
+    }
+  }
+
+  /** Back and Forward between pages select the skill or draft the URL names. */
+  private followLocation() {
+    const snapshot = this.snapshot;
+    const page = this.requestedPage();
+    const target = this.viewer?.target;
+    if (!snapshot || !this.scope) {
+      return;
+    }
+    if (page.draft) {
+      if (
+        target?.draftId !== page.draft &&
+        snapshot.list.drafts?.some((d) => d.id === page.draft)
+      ) {
+        this.filter = "drafts";
+        this.selectDraft(page.draft);
+      }
+    } else if (page.skill && (target?.name !== page.skill || target.draftId)) {
+      const live = snapshot.list.skills.some((skill) => skill.name === page.skill);
+      if (live || snapshot.list.archived.some((skill) => skill.name === page.skill)) {
+        this.filter = live ? "active" : "archived";
+        this.selectSkill(page.skill);
+      }
+    }
+  }
+
+  readonly openPage = () => {
+    const search = this.pageSearch(this.viewer?.target);
+    if (search) {
+      this.context.navigate("skill-workshop", { search });
+    }
+  };
+
+  readonly closePage = () => {
+    this.context.navigate("skill-workshop", { search: "" });
+  };
+
   private async open(target: WorkshopViewerTarget): Promise<void> {
     const scope = this.scope;
     if (!scope) {
       return;
     }
     this.viewer = { target };
+    this.syncLocation();
     const read = (params: Partial<WorkshopViewerTarget>) =>
       scope.client.request<SkillsWorkshopReadResult>("skills.workshop.read", {
         agentId: scope.agentId,
@@ -497,6 +577,12 @@ class SkillWorkshopPageState {
         ? null
         : context.runtimeConfig.state.lastError,
       viewer: this.viewer,
+      pageOpen: (() => {
+        const page = this.requestedPage();
+        return Boolean(page.skill || page.draft);
+      })(),
+      onOpenPage: this.openPage,
+      onClosePage: this.closePage,
       filter: this.filter,
       sort: this.sort,
       tab: this.tab,
